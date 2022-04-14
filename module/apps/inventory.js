@@ -313,7 +313,6 @@ export class PartyInventory extends FormApplication {
         if (item.sourceData) {
             data = foundry.utils.mergeObject(item.sourceData, data);
         }
-
         event.dataTransfer.setData("text/plain", JSON.stringify({
             type: "Item",
             data: data
@@ -327,26 +326,27 @@ export class PartyInventory extends FormApplication {
     async _onDrop(event) {
         const dataStr = event.dataTransfer.getData('text/plain');
         const data = JSON.parse(dataStr);
-
+        
         const scratchpadId = data.data?.flags?.[moduleId]?.scratchpadId;
         const onScratchpad = !!Scratchpad.items.find(i => i.id === scratchpadId)
 
         if (data.type !== 'Item' || onScratchpad) { return false; }
 
-        function createFromData(data) {
+        function createFromData(data,foundry_id = "",type_prefix="",type_value="") {
             const name = data.data.quantity > 1 ? `${data.data.quantity} ${data.name}` : data.name;
-
             Scratchpad.requestCreate({
                 type: data.type,
                 name: name,
+                foundry_id: foundry_id,
+                foundry_type_prefix : type_prefix,
+                foundry_type_value : type_value,
                 img: data.img,
                 sourceData: data
             });
         }
 
         if (data.data) {
-            createFromData(data.data);
-
+            createFromData(data.data,data.id);
             if (data.actorId && game.settings.get(moduleId, 'deleteActorItemOnDrag')) {
                 const actor = game.actors.get(data.actorId);
                 if (actor.isOwner) {
@@ -357,16 +357,22 @@ export class PartyInventory extends FormApplication {
 
             return false;
         } else if (data.pack && data.id) {
+            // This function runs when dropping a compendium item into the party inventory.
             const pack = game.packs.get(data.pack);
             if (pack.documentName == 'Item') {
                 const document = await pack.getDocument(data.id);
-                createFromData(document.data);
+                console.log(document.pack)
+                createFromData(document.data,data.id,"data-pack",document.pack);
                 return false;
             }
         } else if (data.id) {
+            // This function runs when dropping a item into the party inventory.
             const collection = CONFIG['Item'].collection.instance;
             const document = collection.get(data.id)
-            createFromData(document.data);
+
+            
+            createFromData(document.data,data.id,"data-type","Item");
+
             return false;
         }
 

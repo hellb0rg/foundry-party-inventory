@@ -25,6 +25,10 @@
                         <div class="item-name flexrow">
                             <img class="item-image" tabindex="0" role="button" aria-label="{{item.name}}" src="{{item.img}}" data-edit="scratchpad.{{item.id}}.img" />
                             <input class="flex2" type="text" value="{{item.name}}" name="scratchpad.{{item.id}}.name" placeholder="{{localize "PARTY-INVENTORY.name-placeholder"}}" data-dtype="String" />
+                            {{#if item.foundry_id}}
+                                <a class="entity-link content-link" draggable="true" {{item.foundry_type_prefix}} = "{{item.foundry_type_value}}"data-id="{{item.foundry_id}}"><i class="fas fa-suitcase"></i> {{item.name}}</a>
+                            {{/if}}
+
                         </div>
                         {{#if item.quantity}}
                             <a class="item-control item-split flex0" data-action="split" title="{{localize "PARTY-INVENTORY.split-item"}}">
